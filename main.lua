@@ -1368,9 +1368,7 @@ Notify=function(title,text)
 end
 
 ------------------------------------------------------------------ PANELS FORWARD DECLARES
-local InputFrame,InputBox,InputStroke,ClickBtn,ClickScale,showClickBtn,hideClickBtn
-local HelpPanel,MainPanel,SilentAimPanel
-local ESPPanel,HitboxPanel,NoclipPanel,HumanoidPanel,TeleportPanel,GotoPanel,AutoGivePanel,ArrestPanel
+local UI = {}
 
 -- PANEL OPEN/CLOSE helpers
 local ALL_PANELS_REF={}
@@ -1379,7 +1377,7 @@ local function openPanelOnce(p)
 end
 
 ------------------------------------------------------------------ main bar (existing)
-MainPanel=createPanel({
+UI.MainPanel=createPanel({
     name="MiAdminMain",title=CONFIG.title,width=W,headH=HEAD_H,bodyH=INPUT_H+MARGIN,
     position=UDim2.fromScale(0.5,0.58),binary=CONFIG.binary,
     onMin=function(m)
@@ -1389,11 +1387,11 @@ MainPanel=createPanel({
         InputBox.TextTransparency=m; InputFrame.Visible=m<0.99
     end,
 })
-MainPanel.binary.setInner(INPUT_H+MARGIN)
+UI.MainPanel.binary.setInner(INPUT_H+MARGIN)
 InputStroke=create("UIStroke",{Color=col.inputStroke,Transparency=0,Thickness=0.6})
 InputFrame=create("Frame",{Name="InputFrame",Position=UDim2.fromOffset(6,HEAD_H),
     Size=UDim2.new(1,-12,0,INPUT_H),BackgroundColor3=col.inputBg,BorderSizePixel=0,
-    ClipsDescendants=true,ZIndex=2,Parent=MainPanel.Content},
+    ClipsDescendants=true,ZIndex=2,Parent=UI.MainPanel.Content},
     {squareCorner(4),InputStroke})
 InputBox=create("TextBox",{Name="InputBox",Position=UDim2.fromOffset(6,0),
     Size=UDim2.new(1,-12,1,0),BackgroundTransparency=1,Font=Enum.Font.Code,
@@ -1408,19 +1406,19 @@ ClickScale=create("UIScale",{Scale=0})
 ClickBtn=create("TextButton",{Name="ClickGui",AnchorPoint=Vector2.new(0.5,0.5),
     Position=UDim2.fromOffset(0,(HEAD_H+INPUT_H+MARGIN)/2),Size=UDim2.fromOffset(30,30),
     BackgroundColor3=col.bg,BorderSizePixel=0,AutoButtonColor=false,Text="",Visible=false,
-    Parent=MainPanel.Root},{corner(10),create("UIStroke",{Color=col.buttonStroke,Thickness=1}),ClickScale,
+    Parent=UI.MainPanel.Root},{corner(10),create("UIStroke",{Color=col.buttonStroke,Thickness=1}),ClickScale,
     create("ImageLabel",{Name="Saturn",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.5),
         Size=UDim2.fromScale(0.62,0.62),BackgroundTransparency=1,Image=CONFIG.saturnId,
         ImageColor3=col.saturn,ScaleType=Enum.ScaleType.Fit})})
 showClickBtn=function()
-    ClickBtn.Position=UDim2.fromOffset(0,MainPanel.getHeight()/2); ClickBtn.Visible=true; ClickScale.Scale=0
+    ClickBtn.Position=UDim2.fromOffset(0,UI.MainPanel.getHeight()/2); ClickBtn.Visible=true; ClickScale.Scale=0
     tween(ClickScale,0.45,{Scale=1},Enum.EasingStyle.Back)
 end
 hideClickBtn=function()
     local tw=tween(ClickScale,0.2,{Scale=0},Enum.EasingStyle.Quad,Enum.EasingDirection.In)
-    tw.Completed:Connect(function() if MainPanel.state~="closed" then ClickBtn.Visible=false end end)
+    tw.Completed:Connect(function() if UI.MainPanel.state~="closed" then ClickBtn.Visible=false end end)
 end
-ClickBtn.Activated:Connect(function() MainPanel.open() end)
+ClickBtn.Activated:Connect(function() UI.MainPanel.open() end)
 
 ------------------------------------------------------------------ debug billboard (billboard fix)
 local Debug={}
@@ -1637,11 +1635,11 @@ end)
 local SA_W,SA_HEAD,SA_BODY=150,15,120
 local SA_ROW_H,SA_GAP=16,3
 local saInnerW=SA_W-12-4
-SilentAimPanel=createPanel({name="MiAdminSilentAim",title="SILENT AIM",width=SA_W,headH=SA_HEAD,bodyH=SA_BODY,
+UI.SilentAimPanel=createPanel({name="MiAdminSilentAim",title="SILENT AIM",width=SA_W,headH=SA_HEAD,bodyH=SA_BODY,
     position=UDim2.fromScale(0.5,0.32),binary=CONFIG.helpBinary,onMin=function() end})
-SilentAimPanel.binary.setInner(SA_BODY)
+UI.SilentAimPanel.binary.setInner(SA_BODY)
 local saListGroup=create("CanvasGroup",{Name="ListGroup",Position=UDim2.fromOffset(6,SA_HEAD),
-    Size=UDim2.new(1,-12,0,SA_BODY-6),BackgroundTransparency=1,ClipsDescendants=true,Parent=SilentAimPanel.Content})
+    Size=UDim2.new(1,-12,0,SA_BODY-6),BackgroundTransparency=1,ClipsDescendants=true,Parent=UI.SilentAimPanel.Content})
 local saScroll=create("ScrollingFrame",{Name="Scroll",Size=UDim2.fromScale(1,1),
     BackgroundTransparency=1,ScrollBarThickness=2,Parent=saListGroup})
 local saNodes={}
@@ -1831,10 +1829,10 @@ saRelayout()
 ------------------------------------------------------------------ ESP PANEL
 local ESP_W,ESP_HEAD,ESP_BODY=160,15,165
 local espInnerW=ESP_W-12-4
-ESPPanel=createPanel({name="MiAdminESP",title="ESP",width=ESP_W,headH=ESP_HEAD,bodyH=ESP_BODY,
+UI.ESPPanel=createPanel({name="MiAdminESP",title="ESP",width=ESP_W,headH=ESP_HEAD,bodyH=ESP_BODY,
     position=UDim2.fromScale(0.28,0.45),binary=CONFIG.helpBinary,onMin=function() end})
-ESPPanel.binary.setInner(ESP_BODY)
-local espUI=buildPanelContent(ESPPanel,espInnerW,ESP_BODY)
+UI.ESPPanel.binary.setInner(ESP_BODY)
+local espUI=buildPanelContent(UI.ESPPanel,espInnerW,ESP_BODY)
 local espDisp=espUI.addSection("DISPLAY")
 espUI.addCheckbox(espDisp,"enable esp",function() return ESPSettings.Enabled end,function(v) ESPSettings.Enabled=v end)
 espUI.addCheckbox(espDisp,"show username",function() return ESPSettings.ShowUsername end,function(v) ESPSettings.ShowUsername=v end)
@@ -1857,10 +1855,10 @@ espUI.relayout()
 ------------------------------------------------------------------ HITBOX PANEL
 local HB_W,HB_HEAD,HB_BODY=150,15,105
 local hbInnerW=HB_W-12-4
-HitboxPanel=createPanel({name="MiAdminHitbox",title="HITBOX",width=HB_W,headH=HB_HEAD,bodyH=HB_BODY,
+UI.HitboxPanel=createPanel({name="MiAdminHitbox",title="HITBOX",width=HB_W,headH=HB_HEAD,bodyH=HB_BODY,
     position=UDim2.fromScale(0.72,0.45),binary=CONFIG.helpBinary,onMin=function() end})
-HitboxPanel.binary.setInner(HB_BODY)
-local hbUI=buildPanelContent(HitboxPanel,hbInnerW,HB_BODY)
+UI.HitboxPanel.binary.setInner(HB_BODY)
+local hbUI=buildPanelContent(UI.HitboxPanel,hbInnerW,HB_BODY)
 local hbSec=hbUI.addSection("HITBOX")
 hbUI.addCheckbox(hbSec,"enable hitbox",function() return HitboxSettings.Enabled end,function(v) HitboxSettings.Enabled=v; if v then HitboxRefreshAll() else HitboxRestoreAll() end end)
 hbUI.addCheckbox(hbSec,"all body parts",function() return HitboxSettings.AllParts end,function(v) HitboxSettings.AllParts=v; if HitboxSettings.Enabled then HitboxRefreshAll() end end)
@@ -1876,10 +1874,10 @@ hbUI.relayout()
 ------------------------------------------------------------------ NOCLIP PANEL
 local NC_W,NC_HEAD,NC_BODY=150,15,90
 local ncInnerW=NC_W-12-4
-NoclipPanel=createPanel({name="MiAdminNoclip",title="NOCLIP",width=NC_W,headH=NC_HEAD,bodyH=NC_BODY,
+UI.NoclipPanel=createPanel({name="MiAdminNoclip",title="NOCLIP",width=NC_W,headH=NC_HEAD,bodyH=NC_BODY,
     position=UDim2.fromScale(0.28,0.68),binary=CONFIG.helpBinary,onMin=function() end})
-NoclipPanel.binary.setInner(NC_BODY)
-local ncUI=buildPanelContent(NoclipPanel,ncInnerW,NC_BODY)
+UI.NoclipPanel.binary.setInner(NC_BODY)
+local ncUI=buildPanelContent(UI.NoclipPanel,ncInnerW,NC_BODY)
 local ncSec=ncUI.addSection("NOCLIP")
 ncUI.addCheckbox(ncSec,"enable noclip",function() return NoclipSettings.Enabled end,function(v)
     NoclipSettings.Enabled=v
@@ -1900,10 +1898,10 @@ ncUI.relayout()
 ------------------------------------------------------------------ HUMANOID PANEL
 local HUM_W,HUM_HEAD,HUM_BODY=160,15,110
 local humInnerW=HUM_W-12-4
-HumanoidPanel=createPanel({name="MiAdminHumanoid",title="HUMANOID",width=HUM_W,headH=HUM_HEAD,bodyH=HUM_BODY,
+UI.HumanoidPanel=createPanel({name="MiAdminHumanoid",title="HUMANOID",width=HUM_W,headH=HUM_HEAD,bodyH=HUM_BODY,
     position=UDim2.fromScale(0.72,0.68),binary=CONFIG.helpBinary,onMin=function() end})
-HumanoidPanel.binary.setInner(HUM_BODY)
-local humUI=buildPanelContent(HumanoidPanel,humInnerW,HUM_BODY)
+UI.HumanoidPanel.binary.setInner(HUM_BODY)
+local humUI=buildPanelContent(UI.HumanoidPanel,humInnerW,HUM_BODY)
 local humMove=humUI.addSection("MOVEMENT")
 local function humApply(key,prop)
     local char=LocalPlayer.Character; local hum=char and char:FindFirstChildOfClass("Humanoid")
@@ -1924,10 +1922,10 @@ humUI.relayout()
 ------------------------------------------------------------------ TELEPORT PANEL
 local TP_W,TP_HEAD,TP_BODY=200,15,200
 local tpInnerW=TP_W-12-4
-TeleportPanel=createPanel({name="MiAdminTeleport",title="TELEPORT",width=TP_W,headH=TP_HEAD,bodyH=TP_BODY,
+UI.TeleportPanel=createPanel({name="MiAdminTeleport",title="TELEPORT",width=TP_W,headH=TP_HEAD,bodyH=TP_BODY,
     position=UDim2.fromScale(0.14,0.5),binary=CONFIG.helpBinary,onMin=function() end})
-TeleportPanel.binary.setInner(TP_BODY)
-local tpUI=buildPanelContent(TeleportPanel,tpInnerW,TP_BODY)
+UI.TeleportPanel.binary.setInner(TP_BODY)
+local tpUI=buildPanelContent(UI.TeleportPanel,tpInnerW,TP_BODY)
 local tpPresets=tpUI.addSection("PRESETS",true)
 for _,loc in ipairs(TELEPORT_PRESETS) do
     tpUI.addButton(tpPresets,loc.name,function()
@@ -2029,10 +2027,10 @@ tpUI.relayout()
 ------------------------------------------------------------------ GOTO PLAYERS PANEL
 local GOTO_W,GOTO_HEAD,GOTO_BODY=170,15,160
 local gotoInnerW=GOTO_W-12-4
-GotoPanel=createPanel({name="MiAdminGoto",title="GO-TO PLAYERS",width=GOTO_W,headH=GOTO_HEAD,bodyH=GOTO_BODY,
+UI.GotoPanel=createPanel({name="MiAdminGoto",title="GO-TO PLAYERS",width=GOTO_W,headH=GOTO_HEAD,bodyH=GOTO_BODY,
     position=UDim2.fromScale(0.86,0.5),binary=CONFIG.helpBinary,onMin=function() end})
-GotoPanel.binary.setInner(GOTO_BODY)
-local gotoUI=buildPanelContent(GotoPanel,gotoInnerW,GOTO_BODY)
+UI.GotoPanel.binary.setInner(GOTO_BODY)
+local gotoUI=buildPanelContent(UI.GotoPanel,gotoInnerW,GOTO_BODY)
 
 local RoleFilter={Guard=true,Inmate=true,Criminal=true,Neutral=true,Unknown=true}
 
@@ -2158,17 +2156,17 @@ gotoUI.relayout()
 task.spawn(function()
     while true do
         task.wait(2)
-        if GotoPanel and GotoPanel.state=="open" then pcall(RefreshGotoList) end
+        if UI.GotoPanel and UI.GotoPanel.state=="open" then pcall(RefreshGotoList) end
     end
 end)
 
 ------------------------------------------------------------------ AUTO-GIVE PANEL
 local AG_W,AG_HEAD,AG_BODY=150,15,55
 local agInnerW=AG_W-12-4
-AutoGivePanel=createPanel({name="MiAdminAutoGive",title="AUTO-GIVE",width=AG_W,headH=AG_HEAD,bodyH=AG_BODY,
+UI.AutoGivePanel=createPanel({name="MiAdminAutoGive",title="AUTO-GIVE",width=AG_W,headH=AG_HEAD,bodyH=AG_BODY,
     position=UDim2.fromScale(0.5,0.18),binary=CONFIG.helpBinary,onMin=function() end})
-AutoGivePanel.binary.setInner(AG_BODY)
-local agUI=buildPanelContent(AutoGivePanel,agInnerW,AG_BODY)
+UI.AutoGivePanel.binary.setInner(AG_BODY)
+local agUI=buildPanelContent(UI.AutoGivePanel,agInnerW,AG_BODY)
 local agSec=agUI.addSection("AUTO-GIVE",true)
 agUI.addCheckbox(agSec,"enable auto-give",
     function() return AGSettings.Enabled end,
@@ -2184,10 +2182,10 @@ agUI.relayout()
 ------------------------------------------------------------------ ARREST PANEL
 local ARR_W,ARR_HEAD,ARR_BODY=170,15,175
 local arrInnerW=ARR_W-12-4
-ArrestPanel=createPanel({name="MiAdminArrest",title="ARREST",width=ARR_W,headH=ARR_HEAD,bodyH=ARR_BODY,
+UI.ArrestPanel=createPanel({name="MiAdminArrest",title="ARREST",width=ARR_W,headH=ARR_HEAD,bodyH=ARR_BODY,
     position=UDim2.fromScale(0.5,0.75),binary=CONFIG.helpBinary,onMin=function() end})
-ArrestPanel.binary.setInner(ARR_BODY)
-local arrUI=buildPanelContent(ArrestPanel,arrInnerW,ARR_BODY)
+UI.ArrestPanel.binary.setInner(ARR_BODY)
+local arrUI=buildPanelContent(UI.ArrestPanel,arrInnerW,ARR_BODY)
 
 local arrStatusSec=arrUI.addSection("STATUS",true)
 local arrStatusRow={}
@@ -2278,17 +2276,17 @@ arrUI.relayout()
 task.spawn(function()
     while true do
         task.wait(2)
-        if ArrestPanel and ArrestPanel.state=="open" then pcall(RefreshArrestList) end
+        if UI.ArrestPanel and UI.ArrestPanel.state=="open" then pcall(RefreshArrestList) end
     end
 end)
 
 ------------------------------------------------------------------ TRACERS PANEL
 local TR_W,TR_HEAD,TR_BODY=150,15,55
 local trInnerW=TR_W-12-4
-local TracersPanel=createPanel({name="MiAdminTracers",title="TRACERS",width=TR_W,headH=TR_HEAD,bodyH=TR_BODY,
+UI.TracersPanel=createPanel({name="MiAdminTracers",title="TRACERS",width=TR_W,headH=TR_HEAD,bodyH=TR_BODY,
     position=UDim2.fromScale(0.5,0.88),binary=CONFIG.helpBinary,onMin=function() end})
-TracersPanel.binary.setInner(TR_BODY)
-local trUI=buildPanelContent(TracersPanel,trInnerW,TR_BODY)
+UI.TracersPanel.binary.setInner(TR_BODY)
+local trUI=buildPanelContent(UI.TracersPanel,trInnerW,TR_BODY)
 local trSec=trUI.addSection("TRACERS",true)
 trUI.addCheckbox(trSec,"enable tracers",
     function() return TracerSettings.Enabled end,
@@ -2305,11 +2303,11 @@ local HELP_W,HELP_HEAD,HELP_BODY=155,15,65
 local LIST_H=HELP_BODY-6
 local ROW_H_H,GAP_H=16,3
 local innerW_H=HELP_W-12-4
-HelpPanel=createPanel({name="MiAdminCommands",title="COMMANDS",width=HELP_W,headH=HELP_HEAD,bodyH=HELP_BODY,
+UI.HelpPanel=createPanel({name="MiAdminCommands",title="COMMANDS",width=HELP_W,headH=HELP_HEAD,bodyH=HELP_BODY,
     position=UDim2.fromScale(0.5,0.14),binary=CONFIG.helpBinary,onMin=function() end})
-HelpPanel.binary.setInner(HELP_BODY)
+UI.HelpPanel.binary.setInner(HELP_BODY)
 local listGroupH=create("CanvasGroup",{Name="ListGroup",Position=UDim2.fromOffset(6,HELP_HEAD),
-    Size=UDim2.new(1,-12,0,LIST_H),BackgroundTransparency=1,Parent=HelpPanel.Content})
+    Size=UDim2.new(1,-12,0,LIST_H),BackgroundTransparency=1,Parent=UI.HelpPanel.Content})
 local scrollH=create("ScrollingFrame",{Name="Scroll",Size=UDim2.fromScale(1,1),
     BackgroundTransparency=1,ScrollBarThickness=2,Parent=listGroupH})
 local nodesH={}
@@ -2355,8 +2353,8 @@ defineCommand({name="silentaim",aliases={"aim"},category="combat",
     description="toggle silent aim / open menu",usage="silentaim [on/off]",
     run=function(args)
         local arg=args[1] and args[1]:lower()
-        if not arg then openPanelOnce(SilentAimPanel); return good("silent aim menu opened") end
-        if arg=="on" then Settings.Enabled=true; openPanelOnce(SilentAimPanel); return good("silent aim enabled")
+        if not arg then openPanelOnce(UI.SilentAimPanel); return good("silent aim menu opened") end
+        if arg=="on" then Settings.Enabled=true; openPanelOnce(UI.SilentAimPanel); return good("silent aim enabled")
         elseif arg=="off" then Settings.Enabled=false; return good("silent aim disabled")
         else return usage("silentaim [on/off]") end
     end})
@@ -2367,7 +2365,7 @@ defineCommand({name="hitbox",category="combat",
         local size=tonumber(args[1]); if not size then return usage("hitbox <size>") end
         HitboxSettings.Size=size; HitboxSettings.Enabled=size>0
         if HitboxSettings.Enabled then HitboxRefreshAll() else HitboxRestoreAll() end
-        openPanelOnce(HitboxPanel)
+        openPanelOnce(UI.HitboxPanel)
         return good("hitbox",tostring(size))
     end})
 
@@ -2384,7 +2382,7 @@ defineCommand({name="tracers",category="combat",
 defineCommand({name="arrest",category="combat",
     description="open arrest panel",usage="arrest",
     run=function()
-        openPanelOnce(ArrestPanel); return good("arrest panel opened")
+        openPanelOnce(UI.ArrestPanel); return good("arrest panel opened")
     end})
 
 -- ESP
@@ -2392,7 +2390,7 @@ defineCommand({name="esp",category="esp",
     description="toggle esp or open panel",usage="esp [on/off]",
     run=function(args)
         local arg=args[1] and args[1]:lower()
-        if not arg then openPanelOnce(ESPPanel); return good("esp panel opened") end
+        if not arg then openPanelOnce(UI.ESPPanel); return good("esp panel opened") end
         if arg=="on" then ESPSettings.Enabled=true; return good("esp enabled")
         elseif arg=="off" then ESPSettings.Enabled=false; return good("esp disabled")
         else return usage("esp [on/off]") end
@@ -2411,7 +2409,7 @@ defineCommand({name="noclip",category="world",
         if NoclipSettings.Enabled then
             task.spawn(function() NoclipScan(); Notify("Noclip","Done. "..Noclip.BrokenCount.." broken.") end)
         else NoclipRestoreAll() end
-        openPanelOnce(NoclipPanel)
+        openPanelOnce(UI.NoclipPanel)
         return good("noclip "..(NoclipSettings.Enabled and "on" or "off"))
     end})
 
@@ -2430,13 +2428,13 @@ defineCommand({name="tp",aliases={"teleport"},category="world",
                 TeleportTo(loc.pos); return good("teleported","→ "..loc.name)
             end
         end
-        openPanelOnce(TeleportPanel); return good("teleport menu opened")
+        openPanelOnce(UI.TeleportPanel); return good("teleport menu opened")
     end})
 
 defineCommand({name="goto",aliases={"gtp"},category="world",
     description="teleport to player",usage="goto <name>",
     run=function(args)
-        if not args[1] then openPanelOnce(GotoPanel); return good("goto panel opened") end
+        if not args[1] then openPanelOnce(UI.GotoPanel); return good("goto panel opened") end
         local query=args[1]:lower()
         for _,p in ipairs(Players:GetPlayers()) do
             if p~=LocalPlayer and p.Name:lower():find(query) then
@@ -2474,14 +2472,14 @@ defineCommand({name="jump",category="world",
 defineCommand({name="cmd",aliases={"cmds","commands","help"},category="misc",
     description="open commands menu",usage="cmd",
     run=function()
-        openPanelOnce(HelpPanel); return good("commands menu opened")
+        openPanelOnce(UI.HelpPanel); return good("commands menu opened")
     end})
 
 defineCommand({name="autogive",aliases={"ag"},category="misc",
     description="toggle auto-give or open panel",usage="autogive [on/off]",
     run=function(args)
         local arg=args[1] and args[1]:lower()
-        if not arg then openPanelOnce(AutoGivePanel); return good("auto-give panel opened") end
+        if not arg then openPanelOnce(UI.AutoGivePanel); return good("auto-give panel opened") end
         if arg=="on" then AGSettings.Enabled=true; task.spawn(function() RunAutoGive() end); return good("auto-give enabled")
         elseif arg=="off" then AGSettings.Enabled=false; return good("auto-give disabled")
         else return usage("autogive [on/off]") end
@@ -2511,12 +2509,12 @@ defineCommand({name="saveconfig",category="misc",
             end
             -- panel positions (UDim2 → plain table)
             local panels={
-                MainPanel=MainPanel,HelpPanel=HelpPanel,SilentAimPanel=SilentAimPanel,
-                ESPPanel=ESPPanel,HitboxPanel=HitboxPanel,NoclipPanel=NoclipPanel,
-                HumanoidPanel=HumanoidPanel,TeleportPanel=TeleportPanel,
-                GotoPanel=GotoPanel,AutoGivePanel=AutoGivePanel,
-                ArrestPanel=ArrestPanel,TracersPanel=TracersPanel,
-            }
+    MainPanel=UI.MainPanel,HelpPanel=UI.HelpPanel,SilentAimPanel=UI.SilentAimPanel,
+    ESPPanel=UI.ESPPanel,HitboxPanel=UI.HitboxPanel,NoclipPanel=UI.NoclipPanel,
+    HumanoidPanel=UI.HumanoidPanel,TeleportPanel=UI.TeleportPanel,
+    GotoPanel=UI.GotoPanel,AutoGivePanel=UI.AutoGivePanel,
+    ArrestPanel=UI.ArrestPanel,TracersPanel=UI.TracersPanel,
+}
             data.UI={}
             for k,p in pairs(panels) do
                 if p then
@@ -2557,12 +2555,11 @@ defineCommand({name="loadconfig",category="misc",
             end
             if decoded.UI then
                 task.delay(0.5,function()
-                    local panelRefs={MainPanel=MainPanel,HelpPanel=HelpPanel,SilentAimPanel=SilentAimPanel,
-                        ESPPanel=ESPPanel,HitboxPanel=HitboxPanel,NoclipPanel=NoclipPanel,
-                        HumanoidPanel=HumanoidPanel,TeleportPanel=TeleportPanel,
-                        GotoPanel=GotoPanel,AutoGivePanel=AutoGivePanel,
-                        ArrestPanel=ArrestPanel,TracersPanel=TracersPanel}
-                    for k,d in pairs(decoded.UI) do
+                local panelRefs={MainPanel=UI.MainPanel,HelpPanel=UI.HelpPanel,SilentAimPanel=UI.SilentAimPanel,
+ESPPanel=UI.ESPPanel,HitboxPanel=UI.HitboxPanel,NoclipPanel=UI.NoclipPanel,
+HumanoidPanel=UI.HumanoidPanel,TeleportPanel=UI.TeleportPanel,
+GotoPanel=UI.GotoPanel,AutoGivePanel=UI.AutoGivePanel,
+ArrestPanel=UI.ArrestPanel,TracersPanel=UI.TracersPanel}                    for k,d in pairs(decoded.UI) do
                         local p=panelRefs[k]
                         if p then
                             local pos=desUDim2(d.Pos)
@@ -2631,11 +2628,11 @@ InputBox.FocusLost:Connect(function(enterPressed)
     if not enterPressed then return end
     local text=InputBox.Text:match("^%s*(.-)%s*$")
     if text=="" then
-        InputStroke.Color=col.red; MainPanel.binary.flash("bad")
+        InputStroke.Color=col.red; UI.MainPanel.binary.flash("bad")
     else
         local success,segs=execute(text)
         InputStroke.Color=success and col.green or col.red
-        MainPanel.binary.flash(success and "good" or "bad")
+        UI.MainPanel.binary.flash(success and "good" or "bad")
         Debug.show(segs,not success)
         if success then InputBox.Text="" end
     end
@@ -2645,7 +2642,7 @@ end)
 ------------------------------------------------------------------ toggle key
 UserInputService.InputBegan:Connect(function(input,gpe)
     if gpe or input.KeyCode~=CONFIG.toggleKey then return end
-    if MainPanel.state=="open" then MainPanel.close() else MainPanel.open() end
+    if UI.MainPanel.state=="open" then UI.MainPanel.close() else UI.MainPanel.open() end
 end)
 
 ------------------------------------------------------------------ player lifecycle
@@ -2732,4 +2729,4 @@ end)
 
 ------------------------------------------------------------------ open
 Debug.show({seg("MI: alive",col.green)})
-MainPanel.open()
+UI.MainPanel.open()
